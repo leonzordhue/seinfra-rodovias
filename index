@@ -52,10 +52,10 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // ============================================================
-        // CONFIGURAÇÕES – PREENCHA AQUI
+        // CONFIGURAÇÕES – PREENCHIDAS COM SEUS DADOS
         // ============================================================
-        const SPREADSHEET_ID = 'SEU_ID_DA_PLANILHA';
-        const API_KEY = 'SUA_CHAVE_DE_API';
+        const SPREADSHEET_ID = '1bYf2anVF4un84-lusSOeSRaNLiod9fq0joUEnbgHxnM';
+        const API_KEY = 'AIzaSyDaitkJNDTZi3BMFAe9u4wV6U-DIgUS7NA';
         const RANGE = 'A:S'; // Colunas de A até S (ajuste se necessário)
 
         // URL base da API do Google Sheets
