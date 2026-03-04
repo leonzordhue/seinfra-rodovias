@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     :root {
       --azul:        #002D72;
@@ -29,33 +30,17 @@
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
-    body {
-      font-family: var(--font);
-      background: var(--cinza-bg);
-      color: var(--cinza-txt);
-      -webkit-font-smoothing: antialiased;
-      min-height: 100vh;
-    }
+    body { font-family: var(--font); background: var(--cinza-bg); color: var(--cinza-txt); -webkit-font-smoothing: antialiased; min-height: 100vh; }
     ::selection { background: rgba(0,45,114,0.14); }
 
     /* TOPBAR */
-    .topbar {
-      background: var(--azul);
-      padding: 0.5rem 2rem;
-      display: flex; align-items: center; justify-content: space-between;
-    }
+    .topbar { background: var(--azul); padding: 0.5rem 2rem; display: flex; align-items: center; justify-content: space-between; }
     .topbar-left { font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.55); font-weight: 500; }
     .topbar-right { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--amarelo); display: flex; align-items: center; gap: 0.5rem; }
     .topbar-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--amarelo); box-shadow: 0 0 8px var(--amarelo); animation: pulse 2s ease-in-out infinite; }
 
     /* HEADER */
-    .site-header {
-      background: var(--branco); border-bottom: 2px solid var(--azul);
-      padding: 1rem 2rem;
-      display: flex; align-items: center; justify-content: space-between;
-      position: sticky; top: 0; z-index: 100;
-      box-shadow: 0 2px 20px rgba(0,45,114,0.08);
-    }
+    .site-header { background: var(--branco); border-bottom: 2px solid var(--azul); padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 20px rgba(0,45,114,0.08); }
     .header-brand { display: flex; align-items: center; gap: 0.9rem; }
     .brand-escudo { width: 44px; height: 44px; border-radius: 8px; background: var(--azul); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
     .brand-sup { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--cinza-aux); }
@@ -72,7 +57,6 @@
     .page-hero-eyebrow { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--amarelo); margin-bottom: 0.6rem; }
     .page-hero-title { font-size: clamp(1.6rem, 3.5vw, 2.4rem); font-weight: 900; color: var(--branco); letter-spacing: -0.02em; line-height: 1.1; }
     .page-hero-sub { font-size: 0.9rem; color: rgba(255,255,255,0.6); margin-top: 0.5rem; }
-
     .hero-wave { overflow: hidden; line-height: 0; }
     .hero-wave svg { display: block; width: 100%; }
 
@@ -94,11 +78,9 @@
       color: var(--cinza-txt); background: var(--branco);
       border: 1.5px solid var(--borda); border-radius: 8px;
       padding: 0.7rem 2.5rem 0.7rem 1rem; outline: none; cursor: pointer;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      appearance: none;
+      transition: border-color 0.2s, box-shadow 0.2s; appearance: none;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238896A8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-      background-repeat: no-repeat; background-position: right 1rem center;
-      width: 100%;
+      background-repeat: no-repeat; background-position: right 1rem center; width: 100%;
     }
     select:focus { border-color: var(--azul); box-shadow: 0 0 0 3px rgba(0,45,114,0.1); }
 
@@ -111,59 +93,85 @@
     .resultado-card { display: none; }
     .resultado-card.show { display: block; }
 
-    .rodovia-stats {
+    /* STATS */
+    .rodovia-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-box { background: var(--azul-claro); border: 1px solid var(--azul-borda); border-radius: 10px; padding: 1.1rem 1.25rem; text-align: center; }
+    .stat-box-value { font-size: 1.6rem; font-weight: 900; color: var(--azul); letter-spacing: -0.03em; line-height: 1; }
+    .stat-box-label { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--cinza-aux); margin-top: 0.3rem; }
+
+    /* INFO EXTRA (faixa domínio + pavimentação) */
+    .info-extra {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      grid-template-columns: 1fr 1fr;
       gap: 1rem;
       margin-bottom: 1.5rem;
     }
-    .stat-box {
-      background: var(--azul-claro);
-      border: 1px solid var(--azul-borda);
+    @media (max-width: 600px) { .info-extra { grid-template-columns: 1fr; } }
+    .info-box {
+      background: var(--cinza-bg);
+      border: 1.5px solid var(--borda);
       border-radius: 10px;
-      padding: 1.1rem 1.25rem;
-      text-align: center;
+      padding: 1rem 1.25rem;
+      display: flex; align-items: flex-start; gap: 0.75rem;
     }
-    .stat-box-value {
-      font-size: 1.8rem; font-weight: 900;
-      color: var(--azul); letter-spacing: -0.03em;
-      line-height: 1;
+    .info-box-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      background: var(--azul); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; flex-shrink: 0;
     }
-    .stat-box-label {
-      font-size: 0.65rem; font-weight: 700;
-      letter-spacing: 0.12em; text-transform: uppercase;
-      color: var(--cinza-aux); margin-top: 0.3rem;
-    }
+    .info-box-content {}
+    .info-box-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--cinza-aux); margin-bottom: 0.25rem; }
+    .info-box-value { font-size: 0.92rem; font-weight: 700; color: var(--cinza-txt); }
 
-    .table-title {
-      font-size: 0.78rem; font-weight: 700;
-      letter-spacing: 0.1em; text-transform: uppercase;
-      color: var(--cinza-med); margin-bottom: 0.75rem;
-      padding-bottom: 0.5rem; border-bottom: 1px solid var(--borda);
+    /* CHIP SITUAÇÃO */
+    .chip-sit {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      font-size: 0.72rem; font-weight: 700;
+      padding: 0.3em 0.8em; border-radius: 100px;
+      letter-spacing: 0.05em; text-transform: uppercase;
     }
-    .table-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid var(--borda); }
+    .chip-sit.pav  { background: #E6F4ED; border: 1px solid rgba(0,123,62,0.25); color: #007B3E; }
+    .chip-sit.lei  { background: var(--amarelo-cl); border: 1px solid var(--amarelo-brd); color: #7A4F00; }
+    .chip-sit.pla  { background: var(--azul-claro); border: 1px solid var(--azul-borda); color: var(--azul); }
+    .chip-sit.out  { background: var(--cinza-bg); border: 1px solid var(--borda); color: var(--cinza-aux); }
+    .chip-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+    /* TABELA */
+    .table-title { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--cinza-med); margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--borda); }
+    .table-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid var(--borda); margin-bottom: 1.5rem; }
     table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
     thead { background: var(--azul); }
-    thead th {
-      padding: 0.85rem 1rem;
-      font-size: 0.7rem; font-weight: 700;
-      letter-spacing: 0.08em; text-transform: uppercase;
-      color: rgba(255,255,255,0.9); text-align: left;
-    }
+    thead th { padding: 0.85rem 1rem; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.9); text-align: left; }
     tbody tr { border-bottom: 1px solid var(--borda); transition: background 0.15s; }
     tbody tr:last-child { border-bottom: none; }
     tbody tr:hover { background: var(--azul-claro); }
     tbody td { padding: 0.85rem 1rem; color: var(--cinza-txt); }
     tbody td:first-child { font-weight: 700; color: var(--azul); }
 
-    .chip-rev {
-      display: inline-block;
-      font-size: 0.65rem; font-weight: 700;
-      padding: 0.2em 0.65em; border-radius: 100px;
-      letter-spacing: 0.04em;
-    }
+    .chip-rev { display: inline-block; font-size: 0.65rem; font-weight: 700; padding: 0.2em 0.65em; border-radius: 100px; letter-spacing: 0.04em; }
     .chip-rev.pav { background: var(--azul-claro); border: 1px solid var(--azul-borda); color: var(--azul); }
     .chip-rev.not { background: var(--amarelo-cl); border: 1px solid var(--amarelo-brd); color: #7A4F00; }
+
+    /* MAPA */
+    .map-section { border-top: 1px solid var(--borda); padding-top: 1.5rem; }
+    .map-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--cinza-med); display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; }
+    .map-label::before { content: '🗺️'; font-size: 0.9rem; }
+    .map-wrapper { border-radius: 12px; overflow: hidden; border: 1.5px solid var(--borda); box-shadow: 0 4px 20px rgba(0,45,114,0.08); position: relative; }
+    .map-toolbar { background: var(--branco); border-bottom: 1px solid var(--borda); padding: 0.65rem 1rem; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; }
+    .map-toolbar-info { display: flex; align-items: center; gap: 0.6rem; }
+    .map-ramal-badge { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; background: var(--azul); color: #fff; padding: 0.25em 0.8em; border-radius: 100px; }
+    .map-toolbar-actions { display: flex; gap: 0.45rem; }
+    .map-action-btn { display: inline-flex; align-items: center; gap: 0.35rem; font-family: var(--font); font-size: 0.72rem; font-weight: 700; color: var(--azul); text-decoration: none; background: var(--azul-claro); border: 1.5px solid var(--azul-borda); padding: 0.38em 0.85em; border-radius: 100px; cursor: pointer; transition: background 0.15s, transform 0.15s; white-space: nowrap; }
+    .map-action-btn:hover { background: var(--azul-borda); transform: translateY(-1px); }
+    #leaflet-map { width: 100%; height: 400px; background: #e8eef5; }
+    .map-legend { background: var(--branco); border-top: 1px solid var(--borda); padding: 0.55rem 1rem; display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
+    .map-legend-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.68rem; color: var(--cinza-med); font-weight: 600; }
+    .legend-line { width: 22px; height: 3px; border-radius: 2px; }
+    .map-loading-overlay { position: absolute; inset: 0; background: rgba(245,247,251,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem; z-index: 999; }
+    .map-loading-overlay.hidden { display: none; }
+    .map-loading-text { font-size: 0.85rem; font-weight: 600; color: var(--azul); }
+    .loc-no-coords { background: var(--cinza-bg); border: 1.5px dashed var(--borda); border-radius: 12px; padding: 1.5rem; display: flex; align-items: center; gap: 0.75rem; font-size: 0.88rem; color: var(--cinza-aux); font-weight: 500; }
 
     /* FOOTER */
     .site-footer { background: var(--branco); border-top: 2px solid var(--azul); padding: 1.75rem 2rem; }
@@ -181,13 +189,11 @@
 </head>
 <body>
 
-  <!-- TOPBAR -->
   <div class="topbar">
     <div class="topbar-left">Governo do Estado do Amazonas</div>
     <div class="topbar-right"><div class="topbar-dot"></div>Sistema Ativo</div>
   </div>
 
-  <!-- HEADER -->
   <header class="site-header">
     <div class="header-brand">
       <div class="brand-escudo">🛣️</div>
@@ -199,7 +205,6 @@
     <div class="header-badge">Rodovias Estaduais</div>
   </header>
 
-  <!-- MINI HERO -->
   <div class="page-hero">
     <div class="page-hero-accent"></div>
     <div class="page-hero-inner">
@@ -214,7 +219,6 @@
     </svg>
   </div>
 
-  <!-- MAIN -->
   <div class="main-wrap">
 
     <!-- Seletor -->
@@ -237,14 +241,21 @@
       </div>
     </div>
 
-    <!-- Resultado da consulta -->
+    <!-- Resultado -->
     <div class="card resultado-card" id="resultadoCard">
       <div class="card-header">
-        <div class="card-header-icon">📋</div>
+        <div class="card-header-icon">🛣️</div>
         <div class="card-header-title" id="resultadoTitulo">—</div>
       </div>
       <div class="card-body">
+
+        <!-- Stats -->
         <div class="rodovia-stats" id="statsArea"></div>
+
+        <!-- Info extra: Faixa de Domínio + Pavimentação -->
+        <div class="info-extra" id="infoExtra"></div>
+
+        <!-- Tabela de trechos -->
         <div class="table-title">Trechos da Rodovia</div>
         <div class="table-wrap">
           <table>
@@ -260,12 +271,18 @@
             <tbody id="trechosTbody"></tbody>
           </table>
         </div>
+
+        <!-- Mapa -->
+        <div class="map-section">
+          <div class="map-label">Traçado da Rodovia</div>
+          <div id="mapContainer"></div>
+        </div>
+
       </div>
     </div>
 
   </div>
 
-  <!-- FOOTER -->
   <footer class="site-footer">
     <div class="footer-inner">
       <div class="footer-brand">
@@ -279,16 +296,33 @@
     </div>
   </footer>
 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     const SPREADSHEET_ID = '1bYf2anVF4un84-lusSOeSRaNLiod9fq0joUEnbgHxnM';
-    const API_KEY = 'AIzaSyDaitkJNDTZi3BMFAe9u4wV6U-DIgUS7NA';
-    const RANGE = 'A:S';
-    const BASE_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${RANGE}?key=${API_KEY}`;
+    const API_KEY        = 'AIzaSyDaitkJNDTZi3BMFAe9u4wV6U-DIgUS7NA';
+    const RANGE          = 'A:S';
+    const BASE_URL       = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${RANGE}?key=${API_KEY}`;
+    const GEOJSON_URL    = 'https://raw.githubusercontent.com/leonzordhue/seinfra-rodovias/main/RODOVIAS_ESTADUAIS_AMAZONAS.geojson';
 
     let todasRodovias = [];
+    let geoJsonData   = null;
+    let leafletMap    = null;
+    let tracadoLayer  = null;
 
-    document.addEventListener('DOMContentLoaded', carregarDados);
+    // Cores por situação
+    const COR_SITUACAO = {
+      'PAV': '#007B3E',
+      'DUP': '#002D72',
+      'LEI': '#F5A623',
+      'PLA': '#8896A8',
+    };
 
+    document.addEventListener('DOMContentLoaded', () => {
+      carregarDados();
+      carregarGeoJson();
+    });
+
+    // ===== PLANILHA =====
     async function carregarDados() {
       document.getElementById('loadingBar').classList.add('show');
       try {
@@ -297,27 +331,30 @@
         if (data.error) { alert('Erro ao acessar planilha: ' + data.error.message); return; }
 
         const cabecalho = data.values[0];
-        const linhas = data.values.slice(1);
+        const linhas    = data.values.slice(1);
 
         const idx = {
-          codigo:      cabecalho.findIndex(c => c.includes('Código') || c.includes('Código SER/SNV')),
-          rodovia:     cabecalho.findIndex(c => c.includes('Rodovia')),
-          extensao:    cabecalho.findIndex(c => c.includes('Extensão')),
-          inicio:      cabecalho.findIndex(c => c.includes('Início')),
-          final:       cabecalho.findIndex(c => c.includes('Final')),
-          revestimento:cabecalho.findIndex(c => c.includes('Tipo de Revestimento'))
+          codigo:       cabecalho.findIndex(c => c.includes('Código') || c.includes('Código SER')),
+          rodovia:      cabecalho.findIndex(c => c.includes('Rodovia')),
+          extensao:     cabecalho.findIndex(c => c.includes('Extensão')),
+          inicio:       cabecalho.findIndex(c => c.includes('Início')),
+          final:        cabecalho.findIndex(c => c.includes('Final')),
+          revestimento: cabecalho.findIndex(c => c.includes('Tipo de Revestimento')),
+          faixaDominio: 11,  // Coluna L
+          pavimentacao: 16,  // Coluna Q
         };
 
         todasRodovias = linhas.map(linha => ({
-          codigo:       linha[idx.codigo] || '',
-          rodovia:      linha[idx.rodovia] || '',
-          extensao:     linha[idx.extensao] || '',
-          inicio:       linha[idx.inicio] || '',
-          final:        linha[idx.final] || '',
-          revestimento: linha[idx.revestimento] || ''
+          codigo:       linha[idx.codigo]       || '',
+          rodovia:      linha[idx.rodovia]      || '',
+          extensao:     linha[idx.extensao]     || '',
+          inicio:       linha[idx.inicio]       || '',
+          final:        linha[idx.final]        || '',
+          revestimento: linha[idx.revestimento] || '',
+          faixaDominio: linha[idx.faixaDominio] || '',
+          pavimentacao: linha[idx.pavimentacao] || '',
         })).filter(item => item.rodovia);
 
-        // Preenche select
         const rodoviasUnicas = [...new Set(todasRodovias.map(r => r.rodovia))].sort();
         const select = document.getElementById('selectRodovia');
         select.innerHTML = '<option value="">Selecione uma rodovia</option>';
@@ -328,8 +365,7 @@
         });
 
         select.addEventListener('change', (e) => {
-          const nome = e.target.value;
-          if (nome) mostrarRodovia(nome);
+          if (e.target.value) mostrarRodovia(e.target.value);
           else document.getElementById('resultadoCard').classList.remove('show');
         });
 
@@ -341,21 +377,53 @@
       }
     }
 
+    // ===== GEOJSON =====
+    async function carregarGeoJson() {
+      try {
+        const resp = await fetch(GEOJSON_URL);
+        if (!resp.ok) throw new Error('GeoJSON não encontrado');
+        geoJsonData = await resp.json();
+        console.log(`✅ GeoJSON carregado: ${geoJsonData.features.length} features`);
+      } catch (e) {
+        console.warn('⚠️ GeoJSON não carregado:', e.message);
+        geoJsonData = null;
+      }
+    }
+
+    function buscarFeaturesRodovia(nomeRodovia) {
+      if (!geoJsonData) return [];
+      return geoJsonData.features.filter(f => {
+        const r = f.properties['RODOVIA'] || '';
+        return r.trim().toUpperCase() === nomeRodovia.trim().toUpperCase();
+      });
+    }
+
+    // ===== CHIPS =====
     function chipRev(text) {
       if (!text) return '<span class="chip-rev not">Não informado</span>';
       const t = text.toUpperCase();
-      if (t.includes('PAVIMENT') || t.includes('ASFALTO') || t.includes('CBUQ'))
+      if (t.includes('CA') || t.includes('ASFALTO') || t.includes('CBUQ') || t.includes('PAVIMENT'))
         return `<span class="chip-rev pav">${text}</span>`;
       return `<span class="chip-rev not">${text}</span>`;
     }
 
+    function chipSituacao(sit) {
+      const s = (sit || '').toUpperCase();
+      if (s.includes('PAVIMENT') || s === 'PAV') return `<span class="chip-sit pav"><span class="chip-dot"></span>Pavimentada</span>`;
+      if (s.includes('LEITO')    || s === 'LEI') return `<span class="chip-sit lei"><span class="chip-dot"></span>Leito Natural</span>`;
+      if (s.includes('PLANEJ')   || s === 'PLA') return `<span class="chip-sit pla"><span class="chip-dot"></span>Planejada</span>`;
+      if (s.includes('DUPLIC')   || s === 'DUP') return `<span class="chip-sit pav"><span class="chip-dot"></span>Duplicada</span>`;
+      return sit ? `<span class="chip-sit out"><span class="chip-dot"></span>${sit}</span>` : `<span class="chip-sit out">Não informado</span>`;
+    }
+
+    // ===== EXIBIR RODOVIA =====
     function mostrarRodovia(nome) {
       const trechos = todasRodovias.filter(r => r.rodovia === nome);
       const extensaoTotal = trechos.reduce((acc, t) => acc + (parseFloat(t.extensao) || 0), 0).toFixed(2);
-      const card = document.getElementById('resultadoCard');
 
       document.getElementById('resultadoTitulo').textContent = nome;
 
+      // Stats
       document.getElementById('statsArea').innerHTML = `
         <div class="stat-box">
           <div class="stat-box-value">${extensaoTotal}</div>
@@ -367,8 +435,30 @@
         </div>
       `;
 
-      const tbody = document.getElementById('trechosTbody');
-      tbody.innerHTML = trechos.map(t => `
+      // Info extra: Faixa de Domínio (col L) + Pavimentação (col Q)
+      const faixa = trechos.find(t => t.faixaDominio)?.faixaDominio || '';
+      const pavs  = [...new Set(trechos.map(t => t.pavimentacao).filter(Boolean))];
+      const pavStr = pavs.length ? pavs.join(', ') : '';
+
+      document.getElementById('infoExtra').innerHTML = `
+        <div class="info-box">
+          <div class="info-box-icon">📏</div>
+          <div class="info-box-content">
+            <div class="info-box-label">Faixa de Domínio</div>
+            <div class="info-box-value">${faixa || 'Não informado'}</div>
+          </div>
+        </div>
+        <div class="info-box">
+          <div class="info-box-icon">🛣️</div>
+          <div class="info-box-content">
+            <div class="info-box-label">Pavimentação</div>
+            <div class="info-box-value">${pavStr ? chipSituacao(pavStr) : chipSituacao('')}</div>
+          </div>
+        </div>
+      `;
+
+      // Tabela
+      document.getElementById('trechosTbody').innerHTML = trechos.map(t => `
         <tr>
           <td>${t.codigo}</td>
           <td>${t.extensao}</td>
@@ -378,8 +468,115 @@
         </tr>
       `).join('');
 
+      // Mapa
+      renderizarMapa(nome);
+
+      const card = document.getElementById('resultadoCard');
       card.classList.add('show');
       card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ===== MAPA =====
+    function renderizarMapa(nomeRodovia) {
+      const container = document.getElementById('mapContainer');
+      const features  = buscarFeaturesRodovia(nomeRodovia);
+
+      if (!features.length) {
+        container.innerHTML = `<div class="loc-no-coords"><span>🗺️</span>Traçado não disponível para esta rodovia</div>`;
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="map-wrapper">
+          <div class="map-toolbar">
+            <div class="map-toolbar-info">
+              <span class="map-ramal-badge">📐 ${features.length} trecho${features.length > 1 ? 's' : ''} mapeado${features.length > 1 ? 's' : ''}</span>
+            </div>
+            <div class="map-toolbar-actions">
+              <button class="map-action-btn" onclick="centralizarMapa()">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
+                Centralizar
+              </button>
+            </div>
+          </div>
+          <div style="position:relative;">
+            <div id="leaflet-map"></div>
+            <div class="map-loading-overlay" id="mapLoadingOverlay">
+              <div class="spinner"></div>
+              <div class="map-loading-text">Carregando mapa...</div>
+            </div>
+          </div>
+          <div class="map-legend">
+            <div class="map-legend-item">
+              <div class="legend-line" style="background:#007B3E;"></div>Pavimentada
+            </div>
+            <div class="map-legend-item">
+              <div class="legend-line" style="background:#002D72;"></div>Duplicada
+            </div>
+            <div class="map-legend-item">
+              <div class="legend-line" style="background:#F5A623;"></div>Leito Natural
+            </div>
+            <div class="map-legend-item">
+              <div class="legend-line" style="background:#8896A8;"></div>Planejada
+            </div>
+            <div class="map-legend-item" style="margin-left:auto;color:var(--cinza-aux);font-weight:400;">
+              © OpenStreetMap contributors
+            </div>
+          </div>
+        </div>`;
+
+      if (leafletMap) { leafletMap.remove(); leafletMap = null; tracadoLayer = null; }
+
+      setTimeout(() => {
+        const overlay = document.getElementById('mapLoadingOverlay');
+
+        leafletMap = L.map('leaflet-map', {
+          center: [-3.5, -62.0], zoom: 7,
+          zoomControl: true, attributionControl: false
+        });
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(leafletMap);
+
+        // Cria um FeatureCollection com todos os trechos da rodovia
+        const fc = { type: 'FeatureCollection', features: features };
+
+        tracadoLayer = L.geoJSON(fc, {
+          style: (feature) => {
+            const sit = (feature.properties['SITUAÇÃO'] || '').toUpperCase();
+            let cor = '#002D72';
+            if (sit === 'PAV')  cor = '#007B3E';
+            if (sit === 'LEI')  cor = '#F5A623';
+            if (sit === 'PLA')  cor = '#8896A8';
+            if (sit === 'DUP')  cor = '#002D72';
+            return { color: cor, weight: 5, opacity: 0.9, lineJoin: 'round', lineCap: 'round' };
+          },
+          onEachFeature: (feature, layer) => {
+            const p = feature.properties;
+            const sit  = p['DESCRIÇÃ']  || p['SITUAÇÃO'] || '';
+            const rev  = p['DESCRIÇ_1'] || p['TIPO DE RE'] || '';
+            const ext  = p['EXTENSÃO']  || '';
+            layer.bindPopup(`
+              <div style="font-family:'Outfit',sans-serif;font-size:0.82rem;min-width:200px;">
+                <div style="font-weight:800;color:#002D72;font-size:0.95rem;margin-bottom:6px;">${p['RODOVIA'] || ''}</div>
+                <div style="color:#4A5568;margin-bottom:2px;"><strong>Código:</strong> ${p['CÓDIGO S.'] || ''}</div>
+                <div style="color:#4A5568;margin-bottom:2px;"><strong>Situação:</strong> ${sit}</div>
+                <div style="color:#4A5568;margin-bottom:2px;"><strong>Revestimento:</strong> ${rev}</div>
+                <div style="color:#4A5568;margin-bottom:2px;"><strong>Extensão:</strong> ${ext} km</div>
+                <div style="color:#8896A8;font-size:0.75rem;margin-top:4px;">${p['INÍCIO'] || ''} → ${p['FIM'] || ''}</div>
+              </div>
+            `, { maxWidth: 260 });
+          }
+        }).addTo(leafletMap);
+
+        leafletMap.fitBounds(tracadoLayer.getBounds(), { padding: [30, 30] });
+        overlay.classList.add('hidden');
+      }, 80);
+    }
+
+    function centralizarMapa() {
+      if (leafletMap && tracadoLayer) {
+        leafletMap.fitBounds(tracadoLayer.getBounds(), { padding: [30, 30] });
+      }
     }
   </script>
 
