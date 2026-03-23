@@ -380,6 +380,59 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
+    // ╔══════════════════════════════════════════════════════════════════════════╗
+    // ║  AKE — AXIOMATIC KERNEL ENGINE · UNIFIED FIELD THEORY                   ║
+    // ║  Protocolo: UFT-1.0 · Perfil Dependente · Backend: Sheets API + GitHub  ║
+    // ╠══════════════════════════════════════════════════════════════════════════╣
+    // ║  @domain    Infraestrutura Rodoviária — Rodovias Estaduais do Amazonas  ║
+    // ║  @author    Paulo Esteves Fernandes Neto — Chefe DMOB/SEINFRA-AM        ║
+    // ║  @version   1.0.0-ake                                                   ║
+    // ║  @build     GENESIS_RETROFIT                                            ║
+    // ║  @created   2026-03-24                                                  ║
+    // ║  @repo      github.com/leonzordhue/seinfra-rodovias                     ║
+    // ║                                                                          ║
+    // ║  CLASSIFICAÇÃO AKE:                                                      ║
+    // ║    Perfil:        Dependente (Library remota: Sheets API + GeoJSON)      ║
+    // ║    Camada 1 (Library):   REMOTA — Google Sheets API v4 + GeoJSON GitHub ║
+    // ║    Camada 2 (Logic):     Parsing, busca GeoJSON, classificação por      ║
+    // ║                          situação (PAV/LEI/PLA/DUP), chips normativos   ║
+    // ║    Camada 4 (Log):       AKE_BUILD_LOG ativo                            ║
+    // ║    Camada 6 (UI):        Leaflet + selects + detalhes + mapa traçado    ║
+    // ║                                                                          ║
+    // ║  ⚠ NOTA AKE-SOV: Arquivo NÃO soberano. Dois pontos de falha.           ║
+    // ╚══════════════════════════════════════════════════════════════════════════╝
+
+    // ============================================================================
+    // CAMADA 4 — LOG ENGINE
+    // ============================================================================
+    var AKE_BUILD_LOG = [{
+      build: "1.0.0-ake",
+      data: "2026-03-24T10:25:00-04:00",
+      autor: "Paulo Esteves Fernandes Neto",
+      ia_assistente: "Claude Opus 4.6",
+      tipo: "GENESIS_RETROFIT",
+      descricao: "Retrofit AKE no index_rodovia.html. Perfil Dependente — Sheets API + GeoJSON GitHub.",
+      estado_pre_retrofit: { linhas: 666, dados: "Sheets API v4 + GeoJSON repo seinfra-rodovias" },
+      axiomas_identificados: [
+        "COR_SITUACAO{} — Mapeamento cromático por status (PAV/DUP/LEI/PLA)",
+        "buscarFeaturesRodovia() — Matching rodovia↔features GeoJSON por nome",
+        "chipRev() — Classificação visual de tipo de revestimento",
+        "chipSituacao() — Classificação visual por situação de pavimentação",
+        "mostrarRodovia() — Agregação de trechos e cálculo de extensão total"
+      ],
+      tentativas_falhas: [],
+      erros_corrigidos: []
+    }];
+
+    /**
+     * @meta Fonte de dados remota — Rodovias Estaduais do Amazonas
+     * @source Google Sheets API v4 — Cadastro SER/SEINFRA
+     * @geojson GitHub raw: leonzordhue/seinfra-rodovias/RODOVIAS_ESTADUAIS_AMAZONAS.geojson
+     * @sheet_id 1bYf2anVF4un84-lusSOeSRaNLiod9fq0joUEnbgHxnM
+     * @sovereignty DEPENDENTE
+     * @ake_rule AKE-LIB-001
+     */
+
     const SPREADSHEET_ID = '1bYf2anVF4un84-lusSOeSRaNLiod9fq0joUEnbgHxnM';
     const API_KEY        = 'AIzaSyDaitkJNDTZi3BMFAe9u4wV6U-DIgUS7NA';
     const RANGE          = 'A:S';
@@ -391,7 +444,13 @@
     let leafletMap    = null;
     let tracadoLayer  = null;
 
-    // Cores por situação
+    /**
+     * AXIOMA: Mapeamento cromático por status de pavimentação
+     * @source  Cadastro SER/SEINFRA — classificação de trechos rodoviários
+     *          PAV = Pavimentada | DUP = Duplicada | LEI = Leito Natural | PLA = Planejada
+     * @axiom_type Normativo (regra condicional com base no cadastro estadual)
+     * @ake_rule AKE-AXM-001
+     */
     const COR_SITUACAO = {
       'PAV': '#007B3E',
       'DUP': '#002D72',
